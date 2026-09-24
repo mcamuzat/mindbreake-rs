@@ -1,0 +1,21 @@
+[package]
+name = "mindbreake-wasm"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "WASM bridge: thin serialization layer over the mindbreake engine"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+mindbreake = { path = ".." }
+# Must match the installed wasm-bindgen CLI exactly (`wasm-bindgen --version`).
+wasm-bindgen = "=0.2.121"
+serde = "1"
+serde-wasm-bindgen = "0.6"
+console_error_panic_hook = "0.1"
+# rand pulls in getrandom 0.2, which does not compile on wasm32-unknown-unknown
+# without its "js" backend (only the dependency's presence matters: the engine
+# itself only uses seeded generators).
+getrandom = { version = "0.2", features = ["js"] }

@@ -1,0 +1,3 @@
+# esbuild ships its binary as a platform package: its postinstall script is not needed.
+allowBuilds:
+  esbuild: false

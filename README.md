@@ -11,7 +11,7 @@ Un moteur de règles façon **Mindbug** en Rust, avec la même architecture que 
 mindbreake.rs est un projet non officiel, sans lien avec Nerdlab Games ni avec Richard Garfield.
 - **Mindbug** est un jeu de cartes de Richard Garfield, édité par **Nerdlab Games**. Le nom, les règles d'origine, les cartes officielles (*First Contact*, *New Servants*, *Beyond Evolution*, *Battlefruit*, promos…) et leurs illustrations appartiennent à Nerdlab Games et à leurs auteurs.
 - Ce dépôt **ne contient ni les cartes officielles, ni leurs textes, ni leurs images** : `src/cards_official.rs`, `data/official-cards.json` et `web/public/official/` sont dans le `.gitignore`, pour un usage personnel uniquement. Les cartes fournies (`src/cards.rs`) sont des créatures originales inventées pour tester le moteur.
-- Les données des cartes utilisées en local viennent de la base communautaire [ryanascherr.github.io/mindbug](https://ryanascherr.github.io/mindbug/) (dépôt [ryanascherr/mindbug](https://github.com/ryanascherr/mindbug)). Les règles suivent le livret officiel et la [FAQ](https://mindbug.me/faq/) de Nerdlab.
+- Les textes des cartes et les images utilisés en local viennent de la base communautaire [ryanascherr.github.io/mindbug](https://ryanascherr.github.io/mindbug/) (dépôt [ryanascherr/mindbug](https://github.com/ryanascherr/mindbug)). **Ces images sont les scans officiels de Nerdlab Games** : ce projet ne les redistribue pas, `scripts/fetch-official-art.sh` les télécharge sur la machine de chacun, pour un usage personnel. Les règles suivent le livret officiel et la [FAQ](https://mindbug.me/faq/) de Nerdlab.
 - Si vous êtes ayant droit et souhaitez une modification, ouvrez une issue.
 
 ## Cartes

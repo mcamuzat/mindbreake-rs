@@ -3,6 +3,7 @@
 // listed as legal.
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { cardArt, mindbugArt } from "./art";
+import { Emblem, KeywordIcon } from "./emblem";
 import { EngineClient } from "./engine/client";
 import type { AvailableSets, CardId, CardView, ChoicePurpose, GameAction, GameView } from "./engine/types";
 import { GuestSession } from "./session/guest";
@@ -486,6 +487,9 @@ function Card({
       className={`card ${card.exhausted ? "exhausted" : ""} ${highlighted ? "highlighted" : ""} ${targetable ? "targetable" : ""}`}
     >
       <span className={`power ${powerClass}`}>{card.power}</span>
+      <div className="emblem-window">
+        <Emblem name={card.name} />
+      </div>
       <span className="name">{card.name}</span>
       {card.keywords.length > 0 && (
         <div className="keywords">
@@ -495,6 +499,7 @@ function Card({
               className={card.grantedKeywords.includes(k) ? "kw-granted" : undefined}
               title={help[k]}
             >
+              <KeywordIcon keyword={k} />
               {k}
             </span>
           ))}

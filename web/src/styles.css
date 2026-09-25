@@ -164,7 +164,10 @@ main {
   box-shadow: 0 6px 14px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(0 0 0 / 0.25);
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.card:hover { transform: translateY(-4px); }
+/* Each card is its own layer (its power badge stays inside it); the hovered
+   one goes above its neighbors, so its enlarged image isn't covered. */
+.card { isolation: isolate; }
+.card:hover { transform: translateY(-4px); z-index: 10; }
 /* Generated emblem, in place of the illustration; the power overlaps it. */
 .emblem-window {
   height: 78px;

@@ -33,6 +33,7 @@ mindbreake.rs est un projet non officiel, sans lien avec Nerdlab Games ni avec R
 cargo test                          # tests des règles
 cargo run --release -- sim 200 30   # Monte Carlo (30 parties simulées/action) contre l'aléatoire, 200 parties
 cargo run --release -- arena 200 1000 150   # ISMCTS (1000 itérations) contre Monte Carlo (150/action)
+cargo run --release -- balance 2000 300 --sets "Examples,First Contact"   # équilibre : taux de victoire par carte (IA contre elle-même), comparé aux cartes officielles
 cargo run --release -- play         # toi (joueur 0) contre l'IA ISMCTS
 cargo run --release -- play 42      # même chose, avec une graine fixe
 ```

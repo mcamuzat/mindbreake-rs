@@ -1,6 +1,7 @@
 //! CLI:
 //!   mindbreake sim [games] [playouts]   Monte Carlo vs random
 //!   mindbreake arena [games] [iterations] [playouts]   ISMCTS vs Monte Carlo
+//!   mindbreake balance [games] [iterations]   per-card win rates, ISMCTS self-play
 //!   mindbreake play [seed]              you (player 0) vs ISMCTS
 //!   mindbreake cards                    lists the pool with its generated rules text
 //!
@@ -75,7 +76,8 @@ fn main() {
                 games,
             );
         }
-        Some(other) => eprintln!("unknown command: {other} (sim | arena | play | cards)"),
+        Some("balance") => balance(&pool, &names, arg(1, 2000), arg(2, 300) as usize),
+        Some(other) => eprintln!("unknown command: {other} (sim | arena | balance | play | cards)"),
     }
 }
 
@@ -136,6 +138,84 @@ fn report(matchup: &str, wins: u64, games: u64) {
         "{matchup}: {wins}/{games} wins ({:.1}%)",
         100.0 * wins as f64 / games as f64
     );
+}
+
+/// Per-card win rates from self-play. Cards outside the Examples set are the
+/// reference: an example card outside their 10th–90th percentile is flagged.
+fn balance(
+    pool: &[&'static mindbreake::types::CardDef],
+    names: &Option<Vec<String>>,
+    games: u64,
+    iterations: usize,
+) {
+    let threads = std::thread::available_parallelism().map_or(1, |n| n.get());
+    let sets_label = names
+        .as_ref()
+        .map_or("default pool".to_string(), |n| n.join(", "));
+    eprintln!("{games} games, ISMCTS {iterations} iterations, {threads} threads, {sets_label}…");
+    let mut stats = mindbreake::balance::self_play(pool, games, iterations, threads);
+    stats.sort_by(|a, b| b.win_rate().total_cmp(&a.win_rate()));
+
+    let catalog = sets();
+    let examples: Vec<&str> = catalog
+        .iter()
+        .find(|(n, _)| *n == "Examples")
+        .map(|(_, set)| set.iter().map(|(_, def)| def.name).collect())
+        .unwrap_or_default();
+    let is_example = |name: &str| examples.contains(&name);
+
+    // Enough plays for a rate to mean something (margin around ±10%).
+    const MIN_PLAYS: u32 = 100;
+    let mut reference: Vec<f64> = stats
+        .iter()
+        .filter(|s| !is_example(s.name) && s.played >= MIN_PLAYS)
+        .map(|s| s.win_rate())
+        .collect();
+    reference.sort_by(f64::total_cmp);
+    let band = (reference.len() >= 5).then(|| {
+        let at = |q: f64| reference[((reference.len() - 1) as f64 * q).round() as usize];
+        (at(0.1), at(0.9))
+    });
+
+    println!(
+        "{:<28} {:>5} {:>6} {:>12} {:>9}",
+        "card", "power", "played", "win rate", "stolen"
+    );
+    for s in &stats {
+        let flag = match band {
+            Some((low, high)) if is_example(s.name) && s.played >= MIN_PLAYS => {
+                if s.win_rate() > high {
+                    "  ▲ above the official cards"
+                } else if s.win_rate() < low {
+                    "  ▼ below the official cards"
+                } else {
+                    ""
+                }
+            }
+            _ if s.played < MIN_PLAYS => "  (too few plays)",
+            _ => "",
+        };
+        println!(
+            "{:<28} {:>5} {:>6} {:>5.1}% ±{:>4.1} {:>8.1}%{}{flag}",
+            s.name,
+            s.power,
+            s.played,
+            100.0 * s.win_rate(),
+            100.0 * s.margin(),
+            100.0 * s.steal_rate(),
+            if is_example(s.name) { " *" } else { "" },
+        );
+    }
+    match band {
+        Some((low, high)) => println!(
+            "\n* example card. Official cards (10th–90th percentile): {:.1}% – {:.1}%.",
+            100.0 * low,
+            100.0 * high
+        ),
+        None => println!(
+            "\nNo reference band: add an official set (--sets \"Examples,First Contact\")."
+        ),
+    }
 }
 
 fn play(pool: &[&'static mindbreake::types::CardDef], seed: u64) {

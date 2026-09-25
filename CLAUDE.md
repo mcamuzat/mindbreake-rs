@@ -6,6 +6,7 @@ mindbreake.rs: a Mindbug-style rules engine in Rust (`mindbreake` crate), WASM b
 - `cargo test`: rules tests (`tests/rules.rs`).
 - `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all` before every commit.
 - `cargo run --release -- sim 200 30`: Monte Carlo vs random (quick check that the AI still works).
+- `cargo run --release -- balance 2000 300 --sets "Examples,First Contact"`: per-card win rate in ISMCTS self-play (~4 min); example cards outside the official cards' 10th–90th percentile are flagged. Run it after changing a card in `src/cards.rs`.
 - `cargo run --release -- arena 200 1000 150`: ISMCTS (the page's AI) vs Monte Carlo; ~67% at this budget.
 - Web: `./scripts/build-wasm.sh` then `cd web && pnpm dev` / `pnpm build` (includes `tsc`).
 

@@ -5,7 +5,7 @@ Un moteur de règles façon **Mindbug** en Rust, avec la même architecture que 
 - **Cartes typées** (`src/types.rs`, `src/cards.rs`) : mots-clés, déclencheurs (*Play*, *Attack*, *Defeated*), effets composables et bonus statiques. Pas de parser : avec quelques centaines de cartes, on les saisit comme données.
 - **Réducteur** (`src/engine.rs`) : `apply(&mut state, action)` vérifie que l'action est légale, puis fait avancer la partie jusqu'à la prochaine décision.
 - **État** (`src/state.rs`) : `GameState`, `GameAction`, et `WaitingFor`, qui dit qui doit décider quoi.
-- **IA** (`src/ai.rs`) : un agent aléatoire, et un agent Monte Carlo à plat. Pour chaque action possible, il joue N parties au hasard jusqu'au bout. Avant chaque partie simulée, il redistribue les cartes qu'il ne voit pas (sa pioche, la main et la pioche adverses) : c'est la déterminisation.
+- **IA** (`src/ai.rs`) : un agent aléatoire, un agent Monte Carlo à plat et un agent ISMCTS (Information Set MCTS), celui de la page. Avant chaque partie simulée, ils redistribuent les cartes qu'ils ne voient pas (leur pioche, la main et la pioche adverses) : c'est la déterminisation. Le Monte Carlo à plat joue N parties au hasard pour chaque action possible. L'ISMCTS construit un arbre des décisions des deux joueurs (blocages, réponses, Mindbugs) : il prévoit plusieurs coups à l'avance.
 
 ## Crédits et propriété intellectuelle
 mindbreake.rs est un projet non officiel, sans lien avec Nerdlab Games ni avec Richard Garfield.
@@ -32,7 +32,8 @@ mindbreake.rs est un projet non officiel, sans lien avec Nerdlab Games ni avec R
 ```bash
 cargo test                          # tests des règles
 cargo run --release -- sim 200 30   # Monte Carlo (30 parties simulées/action) contre l'aléatoire, 200 parties
-cargo run --release -- play         # toi (joueur 0) contre l'IA Monte Carlo
+cargo run --release -- arena 200 1000 150   # ISMCTS (1000 itérations) contre Monte Carlo (150/action)
+cargo run --release -- play         # toi (joueur 0) contre l'IA ISMCTS
 cargo run --release -- play 42      # même chose, avec une graine fixe
 ```
 
@@ -54,7 +55,7 @@ React (App.tsx) ──postMessage──► Web Worker (engine.worker.ts) ──�
 - **`mindbreake-wasm`** n'est qu'une couche de sérialisation : `newGame`, `view`, `applyAction`, `aiStep`. La partie reste en mémoire WASM (`thread_local!`), et JS ne reçoit que la **vue d'un joueur**.
 - **`src/view.rs`** : c'est le moteur qui masque l'information cachée (la main adverse vaut `null`). C'est aussi lui qui calcule la puissance courante, génère le texte de règles et liste les actions légales. Le front ne calcule rien.
 - **`apply_as(state, player, action)`** vérifie que c'est bien à ce joueur de décider, en plus de la légalité de l'action.
-- Le worker garde la page fluide pendant que l'IA Monte Carlo simule ses parties.
+- Le worker garde la page fluide pendant que l'IA simule ses parties.
 - Le typage TypeScript est écrit à la main dans `web/src/engine/types.ts`, en miroir des `#[serde(...)]` Rust.
 
 ## Multijoueur (pair-à-pair)
@@ -114,7 +115,7 @@ GameAction ──► apply() ──► legal_actions() contient l'action ?
 
 ## Pistes
 
-- ISMCTS (Information Set MCTS) à la place du Monte Carlo à plat : l'IA planifierait plusieurs coups à l'avance au lieu d'un seul.
+- Playouts guidés par une heuristique plutôt qu'aléatoires.
 - Mémoriser les cartes déjà vues (révélées, jouées) pour mieux redistribuer celles qui restent cachées.
 - `serde` et une cible WASM pour un front web, comme phase.rs.
 - Décider des modes de jeu : draft, extensions, plus de 2 joueurs.

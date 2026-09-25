@@ -1,6 +1,7 @@
 //! CLI:
 //!   mindbreake sim [games] [playouts]   Monte Carlo vs random
-//!   mindbreake play [seed]              you (player 0) vs Monte Carlo
+//!   mindbreake arena [games] [iterations] [playouts]   ISMCTS vs Monte Carlo
+//!   mindbreake play [seed]              you (player 0) vs ISMCTS
 //!   mindbreake cards                    lists the pool with its generated rules text
 //!
 //! `--sets "First Contact,New Servants"` (any position) chooses the sets the
@@ -8,7 +9,7 @@
 
 use std::io::{self, BufRead, Write};
 
-use mindbreake::ai::{Agent, MonteCarloAgent, RandomAgent};
+use mindbreake::ai::{Agent, IsmctsAgent, MonteCarloAgent, RandomAgent};
 use mindbreake::cards::{default_pool, pool_of_sets, sets};
 use mindbreake::{apply, legal_actions, new_game, GameAction, GameState, WaitingFor};
 
@@ -46,8 +47,35 @@ fn main() {
     match args.first().map(String::as_str) {
         Some("play") => play(&pool, arg(1, rand::random())),
         Some("cards") => list_cards(&names),
-        Some("sim") | None => simulate(&pool, arg(1, 200), arg(2, 30) as usize),
-        Some(other) => eprintln!("unknown command: {other} (sim | play | cards)"),
+        Some("sim") | None => {
+            let (games, playouts) = (arg(1, 200), arg(2, 30) as usize);
+            let wins = duel(&pool, games, |seed| {
+                (MonteCarloAgent::new(seed, playouts), RandomAgent::new(seed))
+            });
+            report(
+                &format!("Monte Carlo ({playouts} playouts/action) vs random"),
+                wins,
+                games,
+            );
+        }
+        Some("arena") => {
+            let (games, iterations, playouts) =
+                (arg(1, 100), arg(2, 2000) as usize, arg(3, 150) as usize);
+            let wins = duel(&pool, games, |seed| {
+                (
+                    IsmctsAgent::new(seed, iterations),
+                    MonteCarloAgent::new(seed, playouts),
+                )
+            });
+            report(
+                &format!(
+                    "ISMCTS ({iterations} iterations) vs Monte Carlo ({playouts} playouts/action)"
+                ),
+                wins,
+                games,
+            );
+        }
+        Some(other) => eprintln!("unknown command: {other} (sim | arena | play | cards)"),
     }
 }
 
@@ -75,35 +103,44 @@ fn list_cards(names: &Option<Vec<String>>) {
     }
 }
 
-fn simulate(pool: &[&'static mindbreake::types::CardDef], games: u64, playouts: usize) {
-    let mut mc_wins = 0;
+/// Plays `games` games between the two agents built by `agents(seed)` and
+/// returns how many the first one won. Seats alternate so the starting player
+/// doesn't skew the result.
+fn duel<A: Agent, B: Agent>(
+    pool: &[&'static mindbreake::types::CardDef],
+    games: u64,
+    agents: impl Fn(u64) -> (A, B),
+) -> u64 {
+    let mut wins = 0;
     for seed in 0..games {
         let mut state = new_game(pool, seed);
-        let mut mc = MonteCarloAgent::new(seed, playouts);
-        let mut random = RandomAgent::new(seed);
-        // Alternate seats so the starting player doesn't skew the result.
-        let mc_seat = (seed % 2) as usize;
+        let (mut first, mut second) = agents(seed);
+        let first_seat = (seed % 2) as usize;
         while let Some(player) = state.waiting.player() {
-            let action = if player == mc_seat {
-                mc.choose(&state)
+            let action = if player == first_seat {
+                first.choose(&state)
             } else {
-                random.choose(&state)
+                second.choose(&state)
             };
             apply(&mut state, action).expect("the agent chose a legal action");
         }
-        if state.winner() == Some(mc_seat) {
-            mc_wins += 1;
+        if state.winner() == Some(first_seat) {
+            wins += 1;
         }
     }
+    wins
+}
+
+fn report(matchup: &str, wins: u64, games: u64) {
     println!(
-        "Monte Carlo ({playouts} playouts/action) vs random: {mc_wins}/{games} wins ({:.1}%)",
-        100.0 * mc_wins as f64 / games as f64
+        "{matchup}: {wins}/{games} wins ({:.1}%)",
+        100.0 * wins as f64 / games as f64
     );
 }
 
 fn play(pool: &[&'static mindbreake::types::CardDef], seed: u64) {
     let mut state = new_game(pool, seed);
-    let mut ai = MonteCarloAgent::new(seed, 200);
+    let mut ai = IsmctsAgent::new(seed, 2000);
     let mut shown_log = 0;
     println!("Game #{seed}. You are player 0.");
 

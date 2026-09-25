@@ -59,8 +59,8 @@ export class EngineClient {
   }
 
   /** Lets the AI play for `aiSeat` if the decision is theirs; returns the view of `seat`. */
-  aiStep(aiSeat: PlayerId, playouts: number, seat: PlayerId) {
-    return this.call({ kind: "ai", aiSeat, playouts, seed: randomSeed(), seat });
+  aiStep(aiSeat: PlayerId, iterations: number, seat: PlayerId) {
+    return this.call({ kind: "ai", aiSeat, iterations, seed: randomSeed(), seat });
   }
 
   dispose() {

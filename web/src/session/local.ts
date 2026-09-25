@@ -5,12 +5,12 @@ import { Session } from "./session";
 const HUMAN = 0;
 const AI = 1;
 
-/** Against the Monte Carlo AI, with the engine in a local worker. */
+/** Against the ISMCTS AI, with the engine in a local worker. */
 export class LocalAiSession extends Session {
   readonly opponentLabel = "IA";
   readonly canRestart = true;
-  /** Simulated games per action: the AI's difficulty. */
-  playouts = 150;
+  /** Search iterations per decision: the AI's difficulty. */
+  iterations = 1000;
 
   private engine = new EngineClient();
   private aiTimer: ReturnType<typeof setTimeout> | undefined;
@@ -38,7 +38,7 @@ export class LocalAiSession extends Session {
     if (aiToAct) {
       // A short pause so the human can follow the AI's moves.
       this.aiTimer = setTimeout(() => {
-        this.engine.aiStep(AI, this.playouts, HUMAN).then((r) => this.show(r.view), (e) => this.fail(e));
+        this.engine.aiStep(AI, this.iterations, HUMAN).then((r) => this.show(r.view), (e) => this.fail(e));
       }, 500);
     }
   }

@@ -98,7 +98,7 @@ export type EngineRequest =
   | { kind: "new"; seed: number; seat: PlayerId; sets: string[] }
   | { kind: "act"; seat: PlayerId; action: GameAction }
   | { kind: "view"; seat: PlayerId }
-  | { kind: "ai"; aiSeat: PlayerId; playouts: number; seed: number; seat: PlayerId };
+  | { kind: "ai"; aiSeat: PlayerId; iterations: number; seed: number; seat: PlayerId };
 
 export type EngineResponse =
   | { id: number; ok: true; view: GameView; aiAction: GameAction | null }

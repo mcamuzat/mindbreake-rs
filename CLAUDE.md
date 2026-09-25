@@ -6,6 +6,7 @@ mindbreake.rs: a Mindbug-style rules engine in Rust (`mindbreake` crate), WASM b
 - `cargo test`: rules tests (`tests/rules.rs`).
 - `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all` before every commit.
 - `cargo run --release -- sim 200 30`: Monte Carlo vs random (quick check that the AI still works).
+- `cargo run --release -- arena 200 1000 150`: ISMCTS (the page's AI) vs Monte Carlo; ~67% at this budget.
 - Web: `./scripts/build-wasm.sh` then `cd web && pnpm dev` / `pnpm build` (includes `tsc`).
 
 ## Principles

@@ -4,7 +4,7 @@
 
 use std::cell::RefCell;
 
-use mindbreake::ai::{Agent, MonteCarloAgent};
+use mindbreake::ai::{Agent, IsmctsAgent};
 use mindbreake::cards::{pool_for, selectable_sets, SetInfo, MIN_POOL};
 use mindbreake::types::PlayerId;
 use mindbreake::{apply_as, new_game as engine_new_game, view_for, GameAction, GameState};
@@ -85,16 +85,16 @@ pub fn apply_action(actor: u8, action: JsValue) -> Result<JsValue, JsError> {
     })
 }
 
-/// Lets the Monte Carlo AI choose and play for `ai` if the decision is theirs.
+/// Lets the ISMCTS AI choose and play for `ai` if the decision is theirs.
 /// Returns the chosen action, or `null` if it was not the AI's turn to decide.
 #[wasm_bindgen(js_name = aiStep)]
-pub fn ai_step(ai: u8, playouts: u32, seed: u32) -> Result<JsValue, JsError> {
+pub fn ai_step(ai: u8, iterations: u32, seed: u32) -> Result<JsValue, JsError> {
     let ai = player(ai)?;
     with_game(|state| {
         if state.waiting.player() != Some(ai) {
             return Ok(JsValue::NULL);
         }
-        let action = MonteCarloAgent::new(seed.into(), playouts as usize).choose(state);
+        let action = IsmctsAgent::new(seed.into(), iterations as usize).choose(state);
         apply_as(state, ai, action).map_err(|e| JsError::new(&e.to_string()))?;
         to_js(&action)
     })

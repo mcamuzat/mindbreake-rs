@@ -11,7 +11,7 @@ import { LocalAiSession } from "./session/local";
 import { normalizeGameCode } from "./session/protocol";
 import type { Session } from "./session/session";
 
-const DIFFICULTIES = { Facile: 20, Normal: 150, Difficile: 600 } as const;
+const DIFFICULTIES = { Facile: 100, Normal: 1000, Difficile: 4000 } as const;
 type Difficulty = keyof typeof DIFFICULTIES;
 
 const CARD_ACTION_LABEL = { Play: "Jouer", Attack: "Attaquer", Activate: "Activer", Block: "Bloquer" } as const;
@@ -181,7 +181,7 @@ function GameScreen({ mode, onQuit }: { mode: Mode; onQuit: () => void }) {
   }, [mode]);
 
   useEffect(() => {
-    if (session instanceof LocalAiSession) session.playouts = DIFFICULTIES[difficulty];
+    if (session instanceof LocalAiSession) session.iterations = DIFFICULTIES[difficulty];
   }, [session, difficulty]);
 
   if (!session) return null;

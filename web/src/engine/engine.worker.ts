@@ -1,4 +1,4 @@
-// The engine runs here, off the UI thread: the Monte Carlo AI can compute
+// The engine runs here, off the UI thread: the AI can search
 // without freezing the page. This file only relays calls to WASM.
 import init, { aiStep, applyAction, availableSets, newGame, view } from "../wasm/mindbreake.js";
 import type { AvailableSets, EngineRequest, EngineResponse, GameAction, GameView } from "./types";
@@ -18,7 +18,7 @@ function handle(
     case "view":
       return { view: view(req.seat), aiAction: null };
     case "ai": {
-      const aiAction: GameAction | null = aiStep(req.aiSeat, req.playouts, req.seed);
+      const aiAction: GameAction | null = aiStep(req.aiSeat, req.iterations, req.seed);
       return { view: view(req.seat), aiAction };
     }
   }

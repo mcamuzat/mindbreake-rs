@@ -1,7 +1,8 @@
 //! One test per engine building block, with ad-hoc cards: independent of
 //! any catalog (official or example).
 
-use mindbreake::cards::by_name;
+mod common;
+
 use mindbreake::state::ChoicePurpose;
 use mindbreake::types::*;
 use mindbreake::{apply, view_for, GameAction, GameState, WaitingFor, Zone};
@@ -134,7 +135,7 @@ static SILENCER: CardDef = CardDef {
 };
 
 fn card(name: &str) -> &'static CardDef {
-    by_name(name)
+    common::card(name)
 }
 
 fn act(s: &mut GameState, action: GameAction) {

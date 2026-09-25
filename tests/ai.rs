@@ -1,20 +1,23 @@
 use mindbreake::ai::{Agent, IsmctsAgent, RandomAgent};
-use mindbreake::cards::{by_name, default_pool};
+mod common;
+
+use common::card;
+use mindbreake::cards::default_pool;
 use mindbreake::{apply, new_game, GameAction, GameState, WaitingFor, Zone};
 
 /// Player `active` starts. Each player gets a card in hand so nobody loses
 /// for being unable to act.
 fn scenario(active: usize) -> GameState {
     let mut s = GameState::empty(active);
-    s.add_card(0, Zone::Hand, by_name("Moss Golem"));
-    s.add_card(1, Zone::Hand, by_name("Moss Golem"));
+    s.add_card(0, Zone::Hand, card("Moss Golem"));
+    s.add_card(1, Zone::Hand, card("Moss Golem"));
     s
 }
 
 #[test]
 fn ismcts_takes_the_winning_attack() {
     let mut s = scenario(0);
-    let scout = s.add_card(0, Zone::Board, by_name("Ferret Scout"));
+    let scout = s.add_card(0, Zone::Board, card("Ferret Scout"));
     s.players[1].life = 1;
     s.start();
     let action = IsmctsAgent::new(1, 300).choose(&s);
@@ -24,8 +27,8 @@ fn ismcts_takes_the_winning_attack() {
 #[test]
 fn ismcts_blocks_when_the_attack_would_be_lethal() {
     let mut s = scenario(1);
-    let golem = s.add_card(1, Zone::Board, by_name("Moss Golem"));
-    let newt = s.add_card(0, Zone::Board, by_name("Venom Newt"));
+    let golem = s.add_card(1, Zone::Board, card("Moss Golem"));
+    let newt = s.add_card(0, Zone::Board, card("Venom Newt"));
     s.players[0].life = 1;
     s.start();
     apply(&mut s, GameAction::Attack(golem)).unwrap();

@@ -26,15 +26,21 @@ pub static EXAMPLES: CardSet = &[
     (2, with_keywords(CardDef::new("Ferret Scout", 2), &[Sneaky])),
     (
         2,
-        with_keywords(CardDef::new("Thornback Boar", 5), &[Tough]),
+        with_keywords(CardDef::new("Thornback Boar", 5), &[Tough, Hunter]),
     ),
     (
         2,
-        with_keywords(CardDef::new("Venom Newt", 1), &[Poisonous]),
+        with_keywords(CardDef::new("Venom Newt", 1), &[Poisonous, Sneaky]),
     ),
-    (2, with_keywords(CardDef::new("Sky Harrier", 4), &[Hunter])),
-    (2, with_keywords(CardDef::new("Rabid Otter", 3), &[Frenzy])),
-    (2, CardDef::new("Moss Golem", 8)),
+    (
+        2,
+        with_keywords(CardDef::new("Sky Harrier", 3), &[Hunter, Sneaky]),
+    ),
+    (
+        2,
+        with_keywords(CardDef::new("Rabid Otter", 5), &[Frenzy, Poisonous]),
+    ),
+    (2, with_keywords(CardDef::new("Moss Golem", 9), &[Tough])),
     (
         2,
         CardDef {
@@ -51,11 +57,12 @@ pub static EXAMPLES: CardSet = &[
     (
         2,
         CardDef {
+            keywords: &[Sneaky],
             abilities: &[Ability {
                 trigger: Trigger::Play,
                 effect: Effect::GainLife {
                     player: PlayerRef::You,
-                    amount: Quantity::Fixed(2),
+                    amount: Quantity::Fixed(1),
                 },
             }],
             ..CardDef::new("Healing Moth", 2)
@@ -111,12 +118,23 @@ pub static EXAMPLES: CardSet = &[
                 condition: None,
                 modification: Modification::Power(1),
             }],
-            ..CardDef::new("Pack Alpha", 4)
+            ..CardDef::new("Pack Alpha", 5)
         },
     ),
     (
         2,
-        with_keywords(CardDef::new("Mirror Imp", 2), &[Sneaky, Frenzy]),
+        CardDef {
+            keywords: &[Sneaky],
+            abilities: &[Ability {
+                trigger: Trigger::Attack,
+                effect: Effect::Discard {
+                    player: PlayerRef::Opponent,
+                    amount: Quantity::Fixed(1),
+                    up_to: false,
+                },
+            }],
+            ..CardDef::new("Mirror Imp", 2)
+        },
     ),
     (
         2,
@@ -129,16 +147,28 @@ pub static EXAMPLES: CardSet = &[
                     amount: Quantity::Fixed(1),
                 },
             }],
-            ..CardDef::new("Bog Leech", 3)
+            ..CardDef::new("Bog Leech", 4)
         },
     ),
     (
         2,
-        with_keywords(CardDef::new("Stone Sentinel", 6), &[Tough]),
+        CardDef {
+            keywords: &[Tough],
+            abilities: &[Ability {
+                trigger: Trigger::Play,
+                effect: Effect::Discard {
+                    player: PlayerRef::Opponent,
+                    amount: Quantity::Fixed(1),
+                    up_to: false,
+                },
+            }],
+            ..CardDef::new("Stone Sentinel", 7)
+        },
     ),
     (
         2,
         CardDef {
+            keywords: &[Frenzy],
             abilities: &[Ability {
                 trigger: Trigger::Play,
                 effect: Effect::LoseLife {
@@ -152,6 +182,7 @@ pub static EXAMPLES: CardSet = &[
     (
         2,
         CardDef {
+            keywords: &[Poisonous],
             abilities: &[Ability {
                 trigger: Trigger::Play,
                 effect: Effect::ChooseCreatures {

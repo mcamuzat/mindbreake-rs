@@ -1,5 +1,8 @@
 use mindbreake::ai::{Agent, RandomAgent};
-use mindbreake::cards::{by_name, default_pool};
+mod common;
+
+use common::card;
+use mindbreake::cards::default_pool;
 use mindbreake::types::CardId;
 use mindbreake::{apply, new_game, GameAction, GameState, WaitingFor, Zone};
 
@@ -7,13 +10,13 @@ use mindbreake::{apply, new_game, GameAction, GameState, WaitingFor, Zone};
 /// being unable to act.
 fn scenario() -> GameState {
     let mut s = GameState::empty(0);
-    s.add_card(0, Zone::Hand, by_name("Moss Golem"));
-    s.add_card(1, Zone::Hand, by_name("Moss Golem"));
+    s.add_card(0, Zone::Hand, card("Moss Golem"));
+    s.add_card(1, Zone::Hand, card("Moss Golem"));
     s
 }
 
 fn board(s: &mut GameState, player: usize, name: &str) -> CardId {
-    s.add_card(player, Zone::Board, by_name(name))
+    s.add_card(player, Zone::Board, card(name))
 }
 
 fn act(s: &mut GameState, action: GameAction) {
@@ -148,7 +151,7 @@ fn hunter_can_let_the_defender_choose() {
 #[test]
 fn mindbug_steals_the_creature_and_grants_another_turn() {
     let mut s = scenario();
-    s.add_card(0, Zone::Hand, by_name("Ferret Scout"));
+    s.add_card(0, Zone::Hand, card("Ferret Scout"));
     s.start();
     let golem = s.players[0].hand[0];
     act(&mut s, GameAction::Play(golem));
@@ -178,8 +181,8 @@ fn losing_your_last_card_to_a_mindbug_loses_the_game() {
 #[test]
 fn stolen_play_ability_belongs_to_the_new_controller() {
     let mut s = GameState::empty(0);
-    let moth = s.add_card(0, Zone::Hand, by_name("Healing Moth"));
-    s.add_card(0, Zone::Hand, by_name("Moss Golem"));
+    let moth = s.add_card(0, Zone::Hand, card("Healing Moth"));
+    s.add_card(0, Zone::Hand, card("Moss Golem"));
     s.start();
     act(&mut s, GameAction::Play(moth));
     act(&mut s, GameAction::UseMindbug);
@@ -225,7 +228,7 @@ fn attack_trigger_asks_for_a_target_then_combat_continues() {
 #[test]
 fn defeat_all_hits_both_sides_but_not_the_source() {
     let mut s = scenario();
-    let tortoise = s.add_card(0, Zone::Hand, by_name("Quake Tortoise"));
+    let tortoise = s.add_card(0, Zone::Hand, card("Quake Tortoise"));
     let mine = board(&mut s, 0, "Ferret Scout");
     let theirs = board(&mut s, 1, "Rabid Otter");
     let big = board(&mut s, 1, "Moss Golem");
@@ -248,7 +251,7 @@ fn pack_alpha_boosts_other_allies_only() {
 #[test]
 fn player_who_cannot_act_loses() {
     let mut s = GameState::empty(0);
-    s.add_card(1, Zone::Hand, by_name("Moss Golem"));
+    s.add_card(1, Zone::Hand, card("Moss Golem"));
     s.start();
     assert_eq!(s.winner(), Some(1));
 }

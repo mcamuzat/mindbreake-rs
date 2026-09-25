@@ -2,7 +2,8 @@
 //! "you may … if you do", turn-long effects, restrictions, end-of-turn
 //! triggers, hidden-zone effects… Ad-hoc cards only, independent of any catalog.
 
-use mindbreake::cards::by_name;
+mod common;
+
 use mindbreake::state::{ChoicePurpose, ConfirmKind};
 use mindbreake::types::*;
 use mindbreake::{apply, legal_actions, GameAction, GameState, WaitingFor, Zone};
@@ -45,7 +46,7 @@ const DEFEAT_ENEMY: Effect = Effect::ChooseCreatures {
 };
 
 fn card(name: &str) -> &'static CardDef {
-    by_name(name)
+    common::card(name)
 }
 
 fn act(s: &mut GameState, action: GameAction) {

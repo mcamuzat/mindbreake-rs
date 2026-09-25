@@ -735,7 +735,7 @@ mod tests {
         );
         assert_eq!(
             rules_text(by_name("Healing Moth")),
-            ["Play: You gain 2 life."]
+            ["Play: You gain 1 life."]
         );
     }
 }

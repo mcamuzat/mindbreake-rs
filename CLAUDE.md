@@ -19,5 +19,5 @@ mindbreake.rs: a Mindbug-style rules engine in Rust (`mindbreake` crate), WASM b
 - **Art.** `web/public/official/` (downloaded by `scripts/fetch-official-art.sh`) is git-ignored IP, like the official cards. The page must keep working without it (text-card fallback in `web/src/art.ts`).
 - **Rules.** `RULES.md` cites its source ([R] rulebook, [FAQ]) for each rule; a rule without a source is marked ❓.
 - **Parameterize, don't proliferate.** Extend `CreatureFilter`, `PlayerRef` and friends rather than adding one-off `Effect` variants.
-- Test scenarios: `GameState::empty(active)` + `add_card(player, zone, def)` + `start()`, then drive them with `apply`. Building-block tests (`tests/building_blocks.rs`) use ad-hoc cards so they don't depend on any catalog.
+- Test scenarios: `GameState::empty(active)` + `add_card(player, zone, def)` + `start()`, then drive them with `apply`. Tests take their cards from `common::card(name)` (`tests/common/mod.rs`): frozen copies of the example cards, so rebalancing `src/cards.rs` never changes what a test exercises. Official cards fall through to `by_name`. Building-block tests (`tests/building_blocks.rs`) use ad-hoc cards so they don't depend on any catalog.
 - Derived values (power, keywords, blocking, conditions) live in `src/query.rs`: never read `def.power` / `def.keywords` directly for an on-board creature.
